@@ -366,6 +366,8 @@ struct HPX_COMPONENT_EXPORT {cname}
         for k in sorted(c.funcs.keys()):
             if k == "__init__":
                 continue
+            if k == "__del__":
+                continue
             if k in server_only_funcs:
                 continue
             print("HPX_REGISTER_ACTION_DECLARATION(",file=fd)
@@ -407,6 +409,8 @@ struct {clazz} : hpx::components::client_base<{client_class},{server_class}>
 
             # skip init
             if func.name == "__init__":
+                continue
+            if func.name == "__del__":
                 continue
 
             # Beginning of function through the function name...
@@ -489,6 +493,8 @@ HPX_REGISTER_COMPONENT({clazz}_type, {clazz});
 
         for k in sorted(c.funcs.keys()):
             if k == "__init__":
+                continue
+            if k == "__del__":
                 continue
             if k in server_only_funcs:
                 continue
