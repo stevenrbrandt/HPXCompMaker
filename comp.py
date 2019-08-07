@@ -311,16 +311,22 @@ struct HPX_COMPONENT_EXPORT {cname}
         print(file=fd)
         if "__init__" not in c.funcs.keys():
             # Add empty constructor and destructor if need be
-            print("    {clazz}();".format(clazz=c.cname),file=fd)
-            print("    ~{clazz}();".format(clazz=c.cname),file=fd)
+            print("    {clazz}() {{}}".format(clazz=c.cname),file=fd)
+        if "__del__" not in c.funcs.keys():
+            print("    ~{clazz}() {{}}".format(clazz=c.cname),file=fd)
 
         for k in sorted(c.funcs.keys()):
             func = c.funcs[k]
             print(file=fd)
 
             # Special case for __init__...
-            if func.name == "__init__":
-                print("    ~%s();" % c.cname,file=fd)
+            if func.name == "__del__":
+                if func.body is None:
+                    print("    ~%s();" % c.cname,file=fd)
+                else:
+                    print("    ~%s() { %s }" % (c.cname,func.body),file=fd)
+                continue
+            elif func.name == "__init__":
                 print("    %s(" % c.cname,end='',file=fd)
 
             # All non-special functions...
