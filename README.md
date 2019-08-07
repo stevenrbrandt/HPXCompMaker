@@ -42,4 +42,40 @@ implementation.
 
 Likewise, the `hello2()` function, since it has no body, must be provided.
 A file where those functions were provided by hand may be found here:
-(`PrintUtil.cpp`)[https://github.com/stevenrbrandt/HPXCompMaker/blob/master/printutil/PrintUtil.cpp]
+[`PrintUtil.cpp`](https://github.com/stevenrbrandt/HPXCompMaker/blob/master/printutil/PrintUtil.cpp)
+
+See the printutil directory for a working Makefile and code example.
+
+## A second example: Adder
+
+Next, let us consider creating a component with state.
+
+```
+from comp import *
+
+@Component(namespace='adder')
+class Adder:
+
+    counter : int = 0
+    values : smap[str, int] = default
+
+    def get(self) -> int:
+        cplusplus("return counter;")
+
+    def get_value(self, key : str) -> int:
+        cplusplus("return values[key];")
+
+    def add(self, val : int) -> None:
+        cplusplus("counter += val;")
+
+    def add_value(self, key : str, val : int) -> None:
+        cplusplus("values[key] += val;")
+```
+
+In this example, our component has two fields: counter, and values.
+For values, we have type `smap[str,int]` which maps onto
+`std::map<std::string,int>`. Note that we need to initialize it with
+`default`, otherwise, our generated code will try to initialize it
+with `nullptr`.
+
+See the adder directory for a Makefile and working code example.
