@@ -1,7 +1,9 @@
-=The HPX Component Maker=
+# The HPX Component Maker
 
 The idea behind this project is to write a simple Python class definition
 and have it generate all the necessary boilerplate for a full HPX component.
+
+## A first example...
 
 Suppose we create a class named `PrintUtil.py` as follows:
 ```
@@ -16,7 +18,7 @@ Suppose we create a class named `PrintUtil.py` as follows:
       def __init__(self):
           cplusplus("/*comment*/")
 ```
-Running `Python PrintUtil.py` will generate the following two class files:
+By using the magic of Python Decorators, running `Python PrintUtil.py` will generate the following two class files:
 
 The first file is `PrintUtil.hpp`
 ```
@@ -114,3 +116,4 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     printutil::server::PrintUtil::write_action, PrintUtil_write_action);
 ```
+
