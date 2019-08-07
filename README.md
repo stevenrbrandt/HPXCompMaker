@@ -42,4 +42,4 @@ implementation.
 
 Likewise, the `hello2()` function, since it has no body, must be provided.
 A file where those functions were provided by hand may be found here:
-(`PrintUtil.cpp')[https://github.com/stevenrbrandt/HPXCompMaker/blob/master/printutil/PrintUtil.cpp]
+(`PrintUtil.cpp`)[https://github.com/stevenrbrandt/HPXCompMaker/blob/master/printutil/PrintUtil.cpp]
