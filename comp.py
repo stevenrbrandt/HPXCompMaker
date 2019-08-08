@@ -578,6 +578,9 @@ def Ptr(_):
 #smap = template_type("std::map")
 create_type("id_type",alt="hpx::naming::id_type")
 create_type("smap",alt="std::map",is_template=True)
+create_type("myvec",alt="std::vector",is_template=True)
+create_type("Bool",alt="bool")
+create_type("Boolean",alt="bool")
 
 default = object()
 

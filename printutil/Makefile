@@ -22,7 +22,7 @@ main : libPrintUtil.so main.o
 	hpxcxx -g -fPIC --exe=main libPrintUtil.so main.o PrintUtil.o
 
 clean : polish
-	rm -fr main *.o *.so PrintUtil.hpp PrintUtil_macros.cpp
+	rm -fr main *.o *.so
 
 polish:
 	rm -fr hpx.*.log core.*
