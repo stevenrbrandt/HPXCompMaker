@@ -27,6 +27,22 @@ class FuncDesc:
         s += ") -> "+self.rettype
         return s
 
+def get_decl_args(func):
+    result = ''
+    sep = ''
+    for argname, argtype in func.args:
+        result += "%s%s %s" % (sep, ttran(argtype), argname)
+        sep = ','
+    return result
+
+def get_args(func):
+    result = ''
+    sep = ''
+    for argname, argtype in func.args:
+        result += "%s%s" % (sep, argname)
+        sep = ','
+    return result
+
 class ComponentDesc:
     """
     Describe a component, including
@@ -249,7 +265,11 @@ def Component_(a,kwargs):
         c.namespace = kwargs["namespace"]
     if "headers" in kwargs:
         c.headers = kwargs["headers"]
-    print("c:",c)
+    if "pybind11" in kwargs:
+        pybind11 = kwargs["pybind11"]
+    else:
+        pybind11 = None
+    print(c)
 
     # Create the main header file name
     fname = c.cname + ".hpp"
@@ -501,6 +521,108 @@ HPX_REGISTER_COMPONENT({clazz}_type, {clazz});
             print("""HPX_REGISTER_ACTION(
     {server_class}::{func}_action, {clazz}_{func}_action);
             """.format(clazz=c.cname,server_class=c.server_name(),func=k),file=fd)
+    # Next, pybind11
+    if pybind11 is None:
+        return a
+    if pybind11 == c.namespace:
+        raise Exception("pybind11 cannot be the same as namespace")
+    if pybind11 == c.cname:
+        raise Exception("pybind11 cannot be the same as the class name")
+    with open(pybind11+"_py11.cpp","w") as fd:
+        print("""
+#include <hpx/hpx.hpp>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <{clazz}.hpp>
+#include <init_globally.cpp>
+
+namespace py = pybind11;
+
+struct {clazz}_wrapper {{
+    {namesp}::{clazz} *inst;
+
+    {clazz}_wrapper() {{
+        run_hpx<void>([&]() -> void {{
+            inst = new {namesp}::{clazz}(
+                hpx::components::new_<{namesp}::server::{clazz}>(hpx::find_here()));
+        }});
+    }}
+    """.format(clazz=c.cname,namesp=c.namespace),file=fd)
+        for k in sorted(c.funcs.keys()):
+            if k == "__init__":
+                continue
+            if k == "__del__":
+                continue
+            if k in server_only_funcs:
+                continue
+            func = c.funcs[k]
+            decl_args = get_decl_args(func)
+            args = get_args(func)
+            ret = ttran(func.rettype)
+            if ret == "void":
+                print("""
+     void {fname}({decl_args}) {{
+         return run_hpx<void>([&]() -> void {{
+             inst->{fname}({args}).wait();
+         }});
+     }}""".format(fname=k,decl_args=decl_args,args=args),file=fd)
+            else:
+                print("""
+     {ret} {fname}({decl_args}) {{
+         return run_hpx<{ret}>([&]() -> {ret} {{
+             return inst->{fname}({args}).get();
+         }});
+     }}""".format(fname=k,decl_args=decl_args,args=args,ret=ret),file=fd)
+
+
+        print("""
+  }};
+
+  PYBIND11_MODULE({pybind11}, m) {{
+     m.doc() = "Pybind11 interface to {namesp}::{clazz}";
+     m.def("start",start_runtime,"start the runtime");
+     m.def("stop",stop_runtime,"stop the runtime");
+
+     py::class_<{clazz}_wrapper>(m, "{clazz}")
+         .def(py::init<>())""".format(
+            clazz=c.cname,namesp=c.namespace,pybind11=pybind11),file=fd)
+        for k in sorted(c.funcs.keys()):
+            if k == "__init__":
+                continue
+            if k == "__del__":
+                continue
+            if k in server_only_funcs:
+                continue
+            func = c.funcs[k]
+            decl_args = get_decl_args(func)
+            if decl_args == "":
+                cdecl_args = ""
+            else:
+                cdecl_args = ","+decl_args
+            args = get_args(func)
+            ret = ttran(func.rettype)
+            kargs = {
+                "fname":func.name,
+                "args":args,
+                "decl_args":decl_args,
+                "cdecl_args":cdecl_args,
+                "ret":ret,
+                "clazz":c.cname,
+            }
+            if ret == "void":
+                print("""
+         .def("{fname}",
+             []({clazz}_wrapper c{cdecl_args}) {{
+                 c.{fname}({args});
+             }})""".format(**kargs),file=fd)
+            else:
+                print("""
+         .def("{fname}",
+             []({clazz}_wrapper c{cdecl_args}) {{
+                 return c.{fname}({args});
+             }})""".format(**kargs),file=fd)
+        print("         ;",file=fd)
+        print("}",file=fd)
     return a
 
 def Component(**kwargs):
