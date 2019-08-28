@@ -30,6 +30,9 @@ struct HPX_COMPONENT_EXPORT PrintUtil
     void hello2();
     HPX_DEFINE_COMPONENT_ACTION(printutil::server::PrintUtil, hello2);
 
+    int one() { return 1; }
+    HPX_DEFINE_COMPONENT_ACTION(printutil::server::PrintUtil, one);
+
     void write(std::string s) { std::cout << s << std::endl; }
     HPX_DEFINE_COMPONENT_ACTION(printutil::server::PrintUtil, write);
 }; // end server code
@@ -42,6 +45,8 @@ HPX_REGISTER_ACTION_DECLARATION(
   printutil::server::PrintUtil::hello_action, printutil::server::PrintUtil);
 HPX_REGISTER_ACTION_DECLARATION(
   printutil::server::PrintUtil::hello2_action, printutil::server::PrintUtil);
+HPX_REGISTER_ACTION_DECLARATION(
+  printutil::server::PrintUtil::one_action, printutil::server::PrintUtil);
 HPX_REGISTER_ACTION_DECLARATION(
   printutil::server::PrintUtil::write_action, printutil::server::PrintUtil);
 
@@ -75,6 +80,13 @@ struct PrintUtil : hpx::components::client_base<printutil::PrintUtil,printutil::
     }
     static hpx::future<void> hello2(hpx::naming::id_type& this_id) {
         return hpx::async<printutil::server::PrintUtil::hello2_action>(this_id);
+    }
+
+    hpx::future<int> one() {
+        return hpx::async<printutil::server::PrintUtil::one_action>(this->get_id());
+    }
+    static hpx::future<int> one(hpx::naming::id_type& this_id) {
+        return hpx::async<printutil::server::PrintUtil::one_action>(this_id);
     }
 
     hpx::future<void> write(std::string s) {

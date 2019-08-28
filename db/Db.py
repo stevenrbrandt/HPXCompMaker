@@ -6,7 +6,7 @@ from comp import *
 create_type("myvec",alt="std::vector",is_template=True)
 create_type("bool")
 
-@Component(namespace='database',headers=['algorithm'])
+@Component(namespace='database',headers=['algorithm'],pybind11='db')
 class Db:
 
     table : myvec[str] = default
@@ -22,7 +22,7 @@ class Db:
         sort_me();
         """)
 
-    def add_vec(self, entries : myvec[str]) -> None:
+    def add_vec(self, entries : Ref(Const(myvec[str]))) -> None:
         """ Add a bunch of things at once """
         cplusplus("""
         for(auto i=entries.begin();i != entries.end();++i)

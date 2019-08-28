@@ -1,7 +1,17 @@
 HPX_LIB_DIR=/usr/local/lib64
 
-run: main
+run: main db.so
 	LD_LIBRARY_PATH=.:$(HPX_LIB_DIR) ./main 
+	LD_LIBRARY_PATH=.:$(HPX_LIB_DIR) python3 db_test.py
+
+#init_globally.o : init_globally.cpp
+#	hpxcxx -fPIC -g -c init_globally.cpp
+
+db.so : db_py11.o libDb.so #init_globally.o
+	g++ -g -fPIC -shared -o db.so db_py11.o libDb.so #init_globally.o
+
+db_py11.o : db_py11.cpp Db.hpp
+	hpxcxx -g -fPIC -c -I/usr/include/python3.6m -I. db_py11.cpp
 
 Db.hpp Db_macros.cpp : Db.py
 	python3 Db.py

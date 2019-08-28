@@ -14,5 +14,8 @@ HPX_REGISTER_ACTION(
     printutil::server::PrintUtil::hello2_action, PrintUtil_hello2_action);
             
 HPX_REGISTER_ACTION(
+    printutil::server::PrintUtil::one_action, PrintUtil_one_action);
+            
+HPX_REGISTER_ACTION(
     printutil::server::PrintUtil::write_action, PrintUtil_write_action);
             
