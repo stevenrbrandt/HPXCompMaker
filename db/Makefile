@@ -2,7 +2,7 @@ HPX_LIB_DIR=/usr/local/lib64
 
 run: main db.so
 	LD_LIBRARY_PATH=.:$(HPX_LIB_DIR) ./main 
-	#LD_LIBRARY_PATH=.:$(HPX_LIB_DIR) python3 db_test.py
+	LD_LIBRARY_PATH=.:$(HPX_LIB_DIR) python3 db_test.py
 
 db.so : db_py11.o libDb.so 
 	g++ -g -fPIC -shared -o db.so db_py11.o libDb.so 
