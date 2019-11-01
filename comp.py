@@ -534,7 +534,10 @@ HPX_REGISTER_COMPONENT({clazz}_type, {clazz});
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <{clazz}.hpp>
-#include <init_globally.cpp>
+#include <run_hpx.cpp>
+
+using hpx_global::start_runtime;
+using hpx_global::stop_runtime;
 
 namespace py = pybind11;
 
@@ -542,7 +545,7 @@ struct {clazz}_wrapper {{
     {namesp}::{clazz} *inst;
 
     {clazz}_wrapper() {{
-        run_hpx<void>([&]() -> void {{
+        run_hpx([&]() -> void {{
             inst = new {namesp}::{clazz}(
                 hpx::components::new_<{namesp}::server::{clazz}>(hpx::find_here()));
         }});
@@ -562,14 +565,14 @@ struct {clazz}_wrapper {{
             if ret == "void":
                 print("""
      void {fname}({decl_args}) {{
-         return run_hpx<void>([&]() -> void {{
+         return run_hpx([&]() -> void {{
              inst->{fname}({args}).wait();
          }});
      }}""".format(fname=k,decl_args=decl_args,args=args),file=fd)
             else:
                 print("""
      {ret} {fname}({decl_args}) {{
-         return run_hpx<{ret}>([&]() -> {ret} {{
+         return run_hpx([&]() -> {ret} {{
              return inst->{fname}({args}).get();
          }});
      }}""".format(fname=k,decl_args=decl_args,args=args,ret=ret),file=fd)
