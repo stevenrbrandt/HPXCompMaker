@@ -28,7 +28,7 @@ prutil.so : prutil_py11.cpp libPrintUtil.so init_globally.cpp
 	g++ -DHPX_DEBUG -g -fPIC -I. -I/usr/include/python3.6m -shared -o prutil.so prutil_py11.cpp libPrintUtil.so 
 
 clean : polish
-	rm -fr main *.o *.so
+	rm -fr main *.o *.so PrintUtil.hpp
 
 polish:
 	rm -fr hpx.*.log core.*

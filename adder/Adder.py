@@ -7,13 +7,13 @@ class Adder:
     values : smap[str, int] = default
 
     def get(self) -> int:
-        cplusplus("return counter;")
+        "return counter;"
 
     def get_value(self, key : str) -> int:
-        cplusplus("return values[key];")
+        "return values[key];"
 
     def add(self, val : int) -> None:
-        cplusplus("counter += val;")
+        "counter += val;"
 
     def add_value(self, key : str, val : int) -> None:
-        cplusplus("values[key] += val;")
+        "values[key] += val;"

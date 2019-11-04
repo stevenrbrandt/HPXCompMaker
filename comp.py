@@ -175,7 +175,7 @@ def gettype(ty):
         print("<<",ty.__class__.__name__,">>",dir(ty))
         raise Exception("?")
 
-def visittree(tree,cdesc):
+def visittree(tree,cdesc,docmap):
     """
     Visits the AST tree for the component definition
     and identifies all the fields and functions with
@@ -185,7 +185,7 @@ def visittree(tree,cdesc):
     if nm in ["Module"]:
         # tree.body is a list
         for k in tree.body:
-            cdesc = visittree(k,cdesc)
+            cdesc = visittree(k,cdesc,docmap)
 
     elif nm in ["ClassDef"]:
         assert cdesc is None
@@ -193,14 +193,13 @@ def visittree(tree,cdesc):
         # Create the ComponentDesc object
         cdesc = ComponentDesc(tree.name)
         for k in tree.body:
-            cdesc = visittree(k,cdesc)
+            cdesc = visittree(k,cdesc,docmap)
 
     elif nm in ["FunctionDef"]:
         args = []
         code = None
-        for f in tree.body:
-            if type(f) == ast.Expr and type(f.value) == ast.Call:
-                code = f.value.args[0].s
+        if tree.name in docmap.keys():
+            code = docmap[tree.name]
         for a in tree.args.args:
             if a.arg != "self":
                 args += [(a.arg, gettype(a.annotation))]
@@ -258,8 +257,14 @@ def Component_(a,kwargs):
     src = inspect.getsource(a)
     tree = ast.parse(src)
 
+    docmap = {}
+    for k in dir(a):
+        v = getattr(a,k)
+        if hasattr(v,"__name__") and hasattr(v,"__doc__"):
+            docmap[v.__name__]=v.__doc__
+
     # Construct a ComponentDesc object
-    c = visittree(tree,None)
+    c = visittree(tree,None,docmap)
 
     if "namespace" in kwargs:
         c.namespace = kwargs["namespace"]
